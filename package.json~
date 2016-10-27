@@ -1,0 +1,22 @@
+{
+  "name": "feedback-store",
+  "version": "1.0.0",
+  "description": "calculator feedback",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amitOodles/feedbackStore.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amitOodles/feedbackStore/issues"
+  },
+  "homepage": "https://github.com/amitOodles/feedbackStore#readme",
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}
