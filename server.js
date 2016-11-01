@@ -78,6 +78,11 @@ app.listen(3000, function() {
     console.log('Example app listening on port 3000!');
 });
 
+// app.get("/check",function(req,res){
+// 	res.send("a");
+// 	res.send("b");
+// })
+
 app.get('/users', function(req, res) {
     // get all the users
     User.find({}, function(err, users) {
@@ -115,6 +120,12 @@ app.get('/users', function(req, res) {
 
 app.post("/mongo", function(req, res) {
 
+    var resObj = {
+        saved: false,
+        updated: false,
+        error: false
+    }
+
     var data = req.body;
 
     console.log(data);
@@ -128,12 +139,59 @@ app.post("/mongo", function(req, res) {
 
     user.reviews.push(data.reviews);
 
-    user.save(function(err) {
-        try {
-            if (err) throw err;
-        } catch (err) { res.send("an error occured" + err.type) }
-        res.send(user.name + "submitted a feedback");
+    User.find({ mobile: data.mobile }, function(err, users) {
+        if (err) {
+        	console.log("error in search");
+            resObj.error = true;
+            res.json(JSON.stringify(resObj));
+        } else {
+            if (users.length !== 0) {
+            	console.log("user found")
+                users[0].updated_at = new Date();
+                console.log("feedback",data.reviews.feedback);
+                console.log("prev",users[0].reviews[0].feedback);
+                users[0].markModified('reviews');
+                users[0].reviews[0].feedback = data.reviews.feedback;
+                users[0].save(function(err) {
+                    if (err) {
+                    	console.log("unable to update");
+                        resObj.error = true;
+                        res.json(JSON.stringify(resObj));
+                    }else{
+                    	console.log("updated user");
+                    	resObj.updated = true;
+                    	res.json(JSON.stringify(resObj));
+                    }
+                })
+            } else {
+            	user.save(function(err){
+            		if(err){
+            			console.log("error saving new user");
+            			resObj.error = true;
+            			res.json(JSON.stringify(resObj));
+            		}else{
+            			console.log("user created");
+            			resObj.saved = true;
+            			res.json(JSON.stringify(resObj));
+            		}
+            	})
+            }
+        }
+
     })
+
+    // user.save(function(err) {
+    //     try {
+    //         if (err) throw err;
+    //     } catch (err) {
+    //         resObj.error = true
+    //             // res.send("an error occured" + err.type) 
+    //         res.json(JSON.stringify(resObj));
+    //     }
+    //     resObj.saved = true;
+    //     res.json(JSON.stringify(resObj));
+    //     // res.send(user.name + "submitted a feedback");
+    // })
 
     // var dataObj = JSON.parse(data);
 

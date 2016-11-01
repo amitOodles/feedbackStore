@@ -42,7 +42,7 @@
       var data = {
 name : "KT2",
 email : "tickoo2@gmail.com",
-mobile : 412121214,
+// mobile : 412121214,
 reviews: {
   calculator : "sso"
   } 
@@ -59,7 +59,8 @@ reviews: {
             contentType: "application/json",
             traditional: true,
             success: function (data) {
-                alert("done");
+              var resObj = JSON.parse(data);
+                console.log(resObj);
             }
         });
 
