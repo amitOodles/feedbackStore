@@ -38,5 +38,33 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script>
+      var data = {
+name : "KT2",
+email : "tickoo2@gmail.com",
+mobile : 412121214,
+reviews: {
+  calculator : "sso"
+  } 
+}
+      $("button").on("click",function(){
+        var b = data;
+        b.reviews.feedback = $(this).text() 
+        // console.log($(this).text());
+
+         $.ajax({
+            type: 'post',
+            url: 'http://localhost:3000/mongo',
+            data: JSON.stringify(b),
+            contentType: "application/json",
+            traditional: true,
+            success: function (data) {
+                alert("done");
+            }
+        });
+
+      })
+    </script>
+
   </body>
 </html>
