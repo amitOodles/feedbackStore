@@ -5,31 +5,37 @@ var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/tima');
 
 var nodemailer = require('nodemailer');
-var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
+var transporter = nodemailer.createTransport('smtps://amitnirwal80%40gmail.com:Amitnirwal@1@smtp.gmail.com');
 
 var CronJob = require('cron').CronJob;
 
 
 
 var mailOptions = {
-    from: '"Amit" <amit.k@oodlestechnologies.com>', // sender address
-    to: 'amitnirwal80@gmail.com', // list of receivers
+    from: '"Amit" <amitnirwal80@gmail.com>', // sender address
+    to: 'amit.k@oodlestechnologies.com', // list of receivers
     subject: 'Hello ✔', // Subject line
     text: 'Hello world 🐴', // plaintext body
     html: '<b>Hello world 🐴</b>' // html body
 };
 
-var job = new CronJob('00 02 * * * *', function(){
-  }, function (){
-    transporter.sendMail(mailOptions, function(error, info){
+var job = new CronJob('* * * * * *', function(){
+
+	// console.log("job");
+
+	    transporter.sendMail(mailOptions, function(error, info){
     if(error){
         return console.log(error);
     }
     console.log('Message sent: ' + info.response);
 });
+
+  }, function (){
+
+  	console.log("job ends");
+
   },
-  start : false,
-  timeZone : 'Asia/Kolkata'
+  true,"Asia/Kolkata"
 );
 
 job.start();
@@ -42,13 +48,15 @@ app.use(bodyParser.json());
 // if our user.js file is at app/models/user.js
 var User = require('./models/User');
 
+app.listen(3000, function () {
+  console.log('Example app listening on port 3000!');
+});
+
 app.get('/', function (req, res) {
   res.send('Hello World!');
 });
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
-});
+
 
 app.post("/mongo",function(req,res){
 
@@ -66,7 +74,7 @@ app.post("/mongo",function(req,res){
 	user.reviews.push(data.reviews);
 
 	user.save(function(err){
-		if(err) throw err;
+		try{if(err) throw err;} catch(err){res.send("an error occured" + err.type)}
 		res.send(user.name + "submitted a feedback");
 	})
 

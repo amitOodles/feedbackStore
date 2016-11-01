@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 // create a schema
 var userSchema = new Schema({
   email : String,
-  mobile : String,
+  mobile : Number,
   name: String,
   reviews : [],
   // username: { type: String, required: true },
