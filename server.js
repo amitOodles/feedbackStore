@@ -3,6 +3,19 @@ var app = express();
 var mongoose = require('mongoose');
 var fs = require('fs');
 var csv = require('fast-csv');
+var moment = require('moment');
+
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.json());
+
+
+// if our user.js file is at app/models/user.js
+var User = require('./models/User');
+
+app.listen(3000, function() {
+    console.log('Example app listening on port 3000!');
+});
 
 
 app.use(function(req, res, next) {
@@ -48,35 +61,75 @@ var mailOptions = {
         // }]
 };
 
-var job = new CronJob('* * * * * *', function() {
-        transporter.sendMail(mailOptions, function(error, info) {
-            if (error) {
-                return console.log(error);
-            }
-            console.log('Message sent: ' + info.response);
-        });
+// var job = new CronJob('00 */1 * * * *', function() {
 
-    }, function() {
+// 	console.log("job started at", moment().format());
 
-        console.log("job ends");
+//         var today = new Date();
 
-    },
-    false, "Asia/Kolkata"
-);
+//         	var lastM = moment();
+
+// 	var startM = moment().subtract(7,'days');
+
+// 	console.log(lastM.format());
+
+// 	console.log(startM.format());
+
+
+//     // get all the users
+//     User.find({created_at: {$gte: startM, $lt: lastM}}, function(err, users) {
+//         if (err) throw err;
+
+//         console.log(users);
+
+//         var fileName = today.toString().slice(0, 24);
+
+//         var csvStream = csv.createWriteStream({ headers: true }),
+//             writableStream = fs.createWriteStream("csv/" + fileName + ".csv");
+
+//         csvStream.pipe(writableStream);
+//         for (var i = 0; i < users.length; i++) {
+//             csvStream.write({ NAME: users[i].name, "E-MAIL": users[i].email, PHONE: users[i].mobile, REVIEW: users[i].reviews[0].calculator + " - " + users[i].reviews[0].feedback });
+//         }
+//         csvStream.end();
+
+//                 writableStream.on("finish", function() {
+//                 	mailOptions.attachments = [];
+//             mailOptions.attachments.push({ path: "csv/" + fileName + ".csv" });
+//             transporter.sendMail(mailOptions, function(error, info) {
+
+//             	fs.unlink("csv/" + fileName + ".csv",function(err){
+//             		if(err){
+//             			console.log("csv file not deleted");
+//             			return;
+//             		}else{
+//             			console.log("file deleted",moment().format());
+//             		}
+//             	});
+
+//                 if (error){
+//                     console.log("error sending mail",error);
+//                     return;
+//                 }
+                
+//                 console.log('Message sent: ' + info.response);
+
+//             });
+//         });
+
+//     });
+
+//     }, function() {
+
+//         console.log("job ends");
+
+//     },
+//     true, "Asia/Kolkata"
+// );
 
 // job.start();
 
-const bodyParser = require('body-parser');
 
-app.use(bodyParser.json());
-
-
-// if our user.js file is at app/models/user.js
-var User = require('./models/User');
-
-app.listen(3000, function() {
-    console.log('Example app listening on port 3000!');
-});
 
 // app.get("/check",function(req,res){
 // 	res.send("a");
@@ -84,35 +137,72 @@ app.listen(3000, function() {
 // })
 
 app.get('/users', function(req, res) {
+
+	var today = new Date();
+
+	var month = today.getMonth();
+
+	var year = today.getFullYear();
+
+	var day = today.getDate();
+
+	var startDate = day > 15 ? new Date(year,month,16) : new Date(year,month,1);
+
+	var lastDate = day > 15 ? new Date(year,month+1,1) : new Date(year,month,16);
+
+	var lastM = moment();
+
+	var startM = moment().subtract(7,'days');
+
+	console.log(lastM.format());
+
+	console.log(startM.format());
+
+
     // get all the users
-    User.find({}, function(err, users) {
+    User.find({created_at: {$gte: startM, $lt: lastM}}, function(err, users) {
         if (err) throw err;
 
-        var date = new Date();
+        console.log(users);
 
-        var fileName = date.toString().slice(0, 15);
-
-
+        var fileName = today.toString().slice(0, 24);
 
         var csvStream = csv.createWriteStream({ headers: true }),
-            writableStream = fs.createWriteStream("../" + fileName + ".csv");
-
-        writableStream.on("finish", function() {
-            mailOptions.attachments.push({ path: "../" + fileName + ".csv" });
-            transporter.sendMail(mailOptions, function(error, info) {
-                if (error) {
-                    return console.log(error);
-                }
-                console.log('Message sent: ' + info.response);
-            });
-            res.send("generated csv");
-        });
+            writableStream = fs.createWriteStream("csv/" + fileName + ".csv");
 
         csvStream.pipe(writableStream);
         for (var i = 0; i < users.length; i++) {
             csvStream.write({ NAME: users[i].name, "E-MAIL": users[i].email, PHONE: users[i].mobile, REVIEW: users[i].reviews[0].calculator + " - " + users[i].reviews[0].feedback });
         }
         csvStream.end();
+
+                writableStream.on("finish", function() {
+                	mailOptions.attachments = [];
+            mailOptions.attachments.push({ path: "csv/" + fileName + ".csv" });
+            transporter.sendMail(mailOptions, function(error, info) {
+
+            	fs.unlink("csv/" + fileName + ".csv",function(err){
+            		if(err){
+            			console.log("csv file not deleted");
+            			res.send("file del inc");
+            			// return;
+            		}else{
+            			console.log("file deleted",moment().format());
+            		}
+            	});
+
+                if (error){
+                    console.log("error sending mail",error);
+                    res.send("mail not sent");
+                    // return;
+                }
+                
+                console.log('Message sent: ' + info.response);
+                res.send("mail sent");
+
+            });
+        });
+
     });
 
 });
@@ -139,6 +229,8 @@ app.post("/mongo", function(req, res) {
 
     user.reviews.push(data.reviews);
 
+    console.log(data.mobile);
+
     User.find({ mobile: data.mobile }, function(err, users) {
         if (err) {
         	console.log("error in search");
@@ -146,12 +238,13 @@ app.post("/mongo", function(req, res) {
             res.json(JSON.stringify(resObj));
         } else {
             if (users.length !== 0) {
-            	console.log("user found")
+            	console.log("user found");
+            	console.log("users",users);
                 users[0].updated_at = new Date();
                 console.log("feedback",data.reviews.feedback);
                 console.log("prev",users[0].reviews[0].feedback);
-                users[0].markModified('reviews');
                 users[0].reviews[0].feedback = data.reviews.feedback;
+                users[0].markModified('reviews');
                 users[0].save(function(err) {
                     if (err) {
                     	console.log("unable to update");

@@ -4,9 +4,18 @@ var Schema = mongoose.Schema;
 
 // create a schema
 var userSchema = new Schema({
-  email : String,
-  mobile : Number,
-  name: String,
+  email : {
+  	type:String,
+  	required : true
+  },
+  mobile : {
+  	type:Number,
+  	required:true
+  },
+  name:{
+  	type:String,
+  	required:true
+  },
   reviews : [],
   // username: { type: String, required: true },
   // // unique: true
