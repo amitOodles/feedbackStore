@@ -61,73 +61,73 @@ var mailOptions = {
         // }]
 };
 
-// var job = new CronJob('00 */1 * * * *', function() {
+var job = new CronJob('00 33 11 4 10 5', function() {
 
-// 	console.log("job started at", moment().format());
+        console.log("job started at", moment().format());
 
-//         var today = new Date();
+        var today = new Date();
 
-//         	var lastM = moment();
+        var lastM = moment().startOf('day');
 
-// 	var startM = moment().subtract(7,'days');
+        var startM = moment(lastM).subtract(7, 'days');
 
-// 	console.log(lastM.format());
+        console.log(lastM.format());
 
-// 	console.log(startM.format());
+        console.log(startM.format());
 
 
-//     // get all the users
-//     User.find({created_at: {$gte: startM, $lt: lastM}}, function(err, users) {
-//         if (err) throw err;
+        // get all the users
+        User.find({ created_at: { $gte: startM, $lt: lastM } }, function(err, users) {
+            if (err) throw err;
 
-//         console.log(users);
+            console.log(users);
 
-//         var fileName = today.toString().slice(0, 24);
+            var fileName = today.toString().slice(0, 24);
 
-//         var csvStream = csv.createWriteStream({ headers: true }),
-//             writableStream = fs.createWriteStream("csv/" + fileName + ".csv");
+            var csvStream = csv.createWriteStream({ headers: true }),
+                writableStream = fs.createWriteStream("csv/" + fileName + ".csv");
 
-//         csvStream.pipe(writableStream);
-//         for (var i = 0; i < users.length; i++) {
-//             csvStream.write({ NAME: users[i].name, "E-MAIL": users[i].email, PHONE: users[i].mobile, REVIEW: users[i].reviews[0].calculator + " - " + users[i].reviews[0].feedback });
-//         }
-//         csvStream.end();
+            csvStream.pipe(writableStream);
+            for (var i = 0; i < users.length; i++) {
+                csvStream.write({ NAME: users[i].name, "E-MAIL": users[i].email, PHONE: users[i].mobile, REVIEW: users[i].reviews[0].calculator + " - " + users[i].reviews[0].feedback });
+            }
+            csvStream.end();
 
-//                 writableStream.on("finish", function() {
-//                 	mailOptions.attachments = [];
-//             mailOptions.attachments.push({ path: "csv/" + fileName + ".csv" });
-//             transporter.sendMail(mailOptions, function(error, info) {
+            writableStream.on("finish", function() {
+                mailOptions.attachments = [];
+                mailOptions.attachments.push({ path: "csv/" + fileName + ".csv" });
+                transporter.sendMail(mailOptions, function(error, info) {
 
-//             	fs.unlink("csv/" + fileName + ".csv",function(err){
-//             		if(err){
-//             			console.log("csv file not deleted");
-//             			return;
-//             		}else{
-//             			console.log("file deleted",moment().format());
-//             		}
-//             	});
+                    fs.unlink("csv/" + fileName + ".csv", function(err) {
+                        if (err) {
+                            console.log("csv file not deleted");
+                            return;
+                        } else {
+                            console.log("file deleted", moment().format());
+                        }
+                    });
 
-//                 if (error){
-//                     console.log("error sending mail",error);
-//                     return;
-//                 }
-                
-//                 console.log('Message sent: ' + info.response);
+                    if (error) {
+                        console.log("error sending mail", error);
+                        return;
+                    }
 
-//             });
-//         });
+                    console.log('Message sent: ' + info.response);
 
-//     });
+                });
+            });
 
-//     }, function() {
+        });
 
-//         console.log("job ends");
+    }, function() {
 
-//     },
-//     true, "Asia/Kolkata"
-// );
+        console.log("job ends");
 
-// job.start();
+    },
+    true, "Asia/Kolkata"
+);
+
+job.start();
 
 
 
@@ -138,29 +138,19 @@ var mailOptions = {
 
 app.get('/users', function(req, res) {
 
-	var today = new Date();
+    var today = new Date();
 
-	var month = today.getMonth();
+    var lastM = moment().startOf('day');
 
-	var year = today.getFullYear();
+    var startM = moment(lastM).subtract(7, 'days');
 
-	var day = today.getDate();
+    console.log(lastM.format());
 
-	var startDate = day > 15 ? new Date(year,month,16) : new Date(year,month,1);
-
-	var lastDate = day > 15 ? new Date(year,month+1,1) : new Date(year,month,16);
-
-	var lastM = moment();
-
-	var startM = moment().subtract(7,'days');
-
-	console.log(lastM.format());
-
-	console.log(startM.format());
+    console.log(startM.format());
 
 
     // get all the users
-    User.find({created_at: {$gte: startM, $lt: lastM}}, function(err, users) {
+    User.find({ created_at: { $gte: startM, $lt: lastM } }, function(err, users) {
         if (err) throw err;
 
         console.log(users);
@@ -176,27 +166,27 @@ app.get('/users', function(req, res) {
         }
         csvStream.end();
 
-                writableStream.on("finish", function() {
-                	mailOptions.attachments = [];
+        writableStream.on("finish", function() {
+            mailOptions.attachments = [];
             mailOptions.attachments.push({ path: "csv/" + fileName + ".csv" });
             transporter.sendMail(mailOptions, function(error, info) {
 
-            	fs.unlink("csv/" + fileName + ".csv",function(err){
-            		if(err){
-            			console.log("csv file not deleted");
-            			res.send("file del inc");
-            			// return;
-            		}else{
-            			console.log("file deleted",moment().format());
-            		}
-            	});
+                fs.unlink("csv/" + fileName + ".csv", function(err) {
+                    if (err) {
+                        console.log("csv file not deleted");
+                        res.send("file del inc");
+                        // return;
+                    } else {
+                        console.log("file deleted", moment().format());
+                    }
+                });
 
-                if (error){
-                    console.log("error sending mail",error);
+                if (error) {
+                    console.log("error sending mail", error);
                     res.send("mail not sent");
                     // return;
                 }
-                
+
                 console.log('Message sent: ' + info.response);
                 res.send("mail sent");
 
@@ -233,41 +223,41 @@ app.post("/mongo", function(req, res) {
 
     User.find({ mobile: data.mobile }, function(err, users) {
         if (err) {
-        	console.log("error in search");
+            console.log("error in search");
             resObj.error = true;
             res.json(JSON.stringify(resObj));
         } else {
             if (users.length !== 0) {
-            	console.log("user found");
-            	console.log("users",users);
+                console.log("user found");
+                console.log("users", users);
                 users[0].updated_at = new Date();
-                console.log("feedback",data.reviews.feedback);
-                console.log("prev",users[0].reviews[0].feedback);
+                console.log("feedback", data.reviews.feedback);
+                console.log("prev", users[0].reviews[0].feedback);
                 users[0].reviews[0].feedback = data.reviews.feedback;
                 users[0].markModified('reviews');
                 users[0].save(function(err) {
                     if (err) {
-                    	console.log("unable to update");
+                        console.log("unable to update");
                         resObj.error = true;
                         res.json(JSON.stringify(resObj));
-                    }else{
-                    	console.log("updated user");
-                    	resObj.updated = true;
-                    	res.json(JSON.stringify(resObj));
+                    } else {
+                        console.log("updated user");
+                        resObj.updated = true;
+                        res.json(JSON.stringify(resObj));
                     }
                 })
             } else {
-            	user.save(function(err){
-            		if(err){
-            			console.log("error saving new user");
-            			resObj.error = true;
-            			res.json(JSON.stringify(resObj));
-            		}else{
-            			console.log("user created");
-            			resObj.saved = true;
-            			res.json(JSON.stringify(resObj));
-            		}
-            	})
+                user.save(function(err) {
+                    if (err) {
+                        console.log("error saving new user");
+                        resObj.error = true;
+                        res.json(JSON.stringify(resObj));
+                    } else {
+                        console.log("user created");
+                        resObj.saved = true;
+                        res.json(JSON.stringify(resObj));
+                    }
+                })
             }
         }
 
